@@ -72,7 +72,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AmbientStrength: 3.07
+    - _AmbientStrength: 2.28
     - _BumpScale: 1
     - _CloudBaseScale: 1.371
     - _CloudCoverage: 0.346
@@ -86,8 +86,8 @@ Material:
     - _DensityCutoff: 0.103
     - _DetailErodeStrength: 0.383
     - _DetailNormalMapScale: 1
-    - _DirectionalSpread: 46.5
-    - _DirectionalStrength: 5.02
+    - _DirectionalSpread: 50
+    - _DirectionalStrength: 1.84
     - _DstBlend: 0
     - _EarthRadius: 1000000
     - _FinalAdjust: 0.195
@@ -101,7 +101,7 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _PowderFactor: 0.354
+    - _PowderFactor: 0.379
     - _SampleStep: 64
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1

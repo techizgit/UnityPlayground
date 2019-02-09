@@ -239,15 +239,15 @@
 				//float shadowLinePos = linePos + samplingDir.y * 200 * random / (_UpperHeight - _LowerHeight);
 
 				float random = tex2Dlod(_NoiseTex, float4(frac(rayPos.y + _SinTime.x), frac(rayPos.z + _SinTime.y),0,0)).r ;
-				float3 shadowRayPos = rayPos + lightDir * 400 * (0.5 + random) ;
-				float3 shadowLinePos = linePos + lightDir.y * 400  * (0.5 + random) / (_UpperHeight - _LowerHeight);
+				float3 shadowRayPos = rayPos + lightDir * 600 * (0.5 + random) ;
+				float3 shadowLinePos = linePos + lightDir.y * 600  * (0.5 + random) / (_UpperHeight - _LowerHeight);
 				float newDensity = SampleDensity(shadowRayPos, shadowLinePos);
 				float diff = saturate(density - newDensity);
 				diff = smoothstep(0.00,_CloudEdgeFactor, diff)* density ;
 
 				//random = tex2Dlod(_NoiseTex, float4(frac(rayPos.y + random), frac(rayPos.z + random),0,0)).r ;
-				shadowRayPos = rayPos + lightDir * 1000 * (0.5 + random) ;
-				shadowLinePos = linePos + lightDir.y * 1000  * (0.5 + random) / (_UpperHeight - _LowerHeight);
+				shadowRayPos = rayPos + lightDir * 3000 * (0.5 + random) ;
+				shadowLinePos = linePos + lightDir.y * 3000  * (0.5 + random) / (_UpperHeight - _LowerHeight);
 				newDensity = SampleDensity(shadowRayPos, shadowLinePos);
 
 				diff *= saturate((1 - newDensity * 2));
