@@ -72,50 +72,54 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AmbientStrength: 2.28
+    - _AmbientStrength: 1.12
     - _BumpScale: 1
-    - _CloudBaseScale: 1.371
-    - _CloudCoverage: 0.346
-    - _CloudDetailScale: 0.739
-    - _CloudEdgeFactor: 0.063
-    - _CloudTransmittance: 0.0153
-    - _CloudWeatherScale: 2.62
+    - _CloudBaseScale: 1.99
+    - _CloudCoverage: 0.718
+    - _CloudDetailScale: 0.551
+    - _CloudEdgeFactor: 0.092
+    - _CloudShapeDirection: 302
+    - _CloudShapeSpeed: 0.94
+    - _CloudTransmittance: 0.0088
+    - _CloudWeatherDirection: 87
+    - _CloudWeatherScale: 3.05
+    - _CloudWeatherSpeed: 0.45
     - _Cutoff: 0.5
-    - _DensityClampHigh: 1.278
-    - _DensityClampLow: 0.412
-    - _DensityCutoff: 0.103
-    - _DetailErodeStrength: 0.383
+    - _DensityClampHigh: 1.736
+    - _DensityClampLow: 0.7
+    - _DensityCutoff: 0.2
+    - _DetailErodeStrength: 0.317
     - _DetailNormalMapScale: 1
-    - _DirectionalSpread: 50
-    - _DirectionalStrength: 1.84
+    - _DirectionalSpread: 13.6
+    - _DirectionalStrength: 1.06
     - _DstBlend: 0
-    - _EarthRadius: 1000000
-    - _FinalAdjust: 0.195
+    - _EarthRadius: 6400000
+    - _FinalAdjust: 0.273
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _LightAdjust: 3.35
-    - _LowDensityThreshold: 0.047
-    - _LowerHeight: 1000
+    - _LightAdjust: 6.08
+    - _LowDensityThreshold: 0.103
+    - _LowerHeight: 1500
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _PowderFactor: 0.379
+    - _PowderFactor: 0.064
     - _SampleStep: 64
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _Test: 2.47
+    - _Test: 2.27
     - _ThicknessLightFactor: 7.18
     - _TransmittanceFactor1: 0
     - _TransmittanceFactor2: 0
     - _UVSec: 0
-    - _UpperHeight: 7000
-    - _ViewRange: 40000
+    - _UpperHeight: 6000
+    - _ViewRange: 200000
     - _ZWrite: 1
     - _sampleStep: 64
     m_Colors:
-    - _AmbientColor: {r: 0.31181028, g: 0.42160094, b: 0.46226418, a: 1}
+    - _AmbientColor: {r: 0.32658422, g: 0.37037203, b: 0.38679248, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

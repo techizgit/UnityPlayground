@@ -54,7 +54,7 @@
 				//i.modelPos = (i.modelPos + 1) * 0.5;
 				fixed4 tex = tex3D(_Volume, i.modelPos.xzy );
 				//return i.worldPos/50;
-				return tex.r*0.33 + tex.g * 0.33  + tex.b * 0.33;
+				return tex;
 			}
 			ENDCG
 		}

@@ -66,6 +66,7 @@
 				half4 col = tex2D(_MainTex, i.uv);
 				float4 cloud = tex2D(_CloudTex, i.uv);
 				float d = Linear01Depth(tex2D(_CameraDepthTexture, i.uv_depth));
+				if (cloud.a > 0.96) cloud.a = 1;
 				if (d == 1) 
 				{
 					return lerp(col, cloud, 1 - cloud.a);

@@ -3,52 +3,58 @@
 	Properties
 	{
 
-		
+		[Header(Textures)]
 		_CloudBase("Cloud Base Texture", 3D) = "white" {}
+		_CloudBaseScale("Cloud Base Shape Scale", Range(0.4,2.8)) = 1
 
 		_CloudDetail("Cloud Detail Texture", 3D) = "white" {}
+		_CloudDetailScale("Cloud Detail Shape Scale", Range(0.2,1.2)) = 1
+
+		_CloudWeather("Cloud Coverage Texture", 2D) = "white" {}
+		_CloudWeatherScale("Cloud Weather Scale", Range(0.7,10)) = 1
 
 		_NoiseTex("Texture for Random", 2D) = "white"{}
-		_CloudWeather("Cloud Coverage Texture", 2D) = "white" {}
 
+
+		[Header(Geometry)]
 		_ViewRange("Cloud View Range" ,float) = 50000
 		_EarthRadius("Earth Radius", float) = 200000
 		_LowerHeight("Atmosphere Lower Height", float) = 1000
 		_UpperHeight("Atmosphere Upper Height", float) = 4000
 
 
+		[Header(Shaping)]
 		_DensityCutoff("Density Cutoff", Range(0,0.2)) = 0.2
 		_CloudCoverage("Cloud Coverage", Range(0.0,1)) = 0.5
 
-		_CloudBaseScale("Cloud Base Shape Scale", Range(0.4,1.8)) = 1
-		_CloudDetailScale("Cloud Detail Shape Scale", Range(0.5,2)) = 1
-		_CloudWeatherScale("Cloud Weather Scale", Range(0.7,10)) = 1
-		_CloudTransmittance("Cloud Overall Transmittance", Range(0.0010,0.0250)) = 0.010
+
+
 
 		_DetailErodeStrength("Detail Erode Strength", Range(0.00,0.6)) = 0.3
-
-
-		_AmbientColor("Ambient Color", Color) = (0.2,0.2,0.2,1.0)
-		_AmbientStrength("Skylight Strength", Range(0,10)) = 2
-
 		_DensityClampLow("Density Clamping Low Value" ,Range(0,1)) = 0.1
 		_DensityClampHigh("Density Clamping Hight Value" ,Range(1.1,2)) = 1.5
-		_CloudEdgeFactor("Cloud Edge Factor" ,Range(0.01,0.2)) = 0.1
+		_Test("Thickness Debug",Range(0.3,5)) = 1
+
+		[Header(Animation)]
+		_CloudShapeSpeed("Cloud Shape Speed", Range(0,10)) = 1
+		_CloudShapeDirection("Cloud Shape Direction", Range(0,360)) = 0
+		_CloudWeatherSpeed("Cloud Weather Speed", Range(0,10)) = 1
+		_CloudWeatherDirection("Cloud Weather Direction", Range(0,360)) = 1
 
 
-		_PowderFactor("Powder Effect Factor", Range(0.05,0.5)) = 0.15
 
-		_LightAdjust("Light Adjustment", Range(0,10)) = 1
-
-
+		[Header(Lighting)]
+		_CloudTransmittance("Cloud Overall Transmittance", Range(0.0010,0.0250)) = 0.010
+		_AmbientColor("Ambient Color", Color) = (0.2,0.2,0.2,1.0)
+		_AmbientStrength("Skylight Strength", Range(0,10)) = 2
+		_PowderFactor("Powder Effect Factor", Range(0.01,0.2)) = 0.02
 		_DirectionalSpread("Directional Spread", Range(0,50)) = 30
 		_DirectionalStrength("Directional Strength", Range(0,10)) = 4
-
-		_Test("Test",Range(1,5)) = 1
-
-		_LowDensityThreshold("Low Density Threshold",Range(0,0.2)) = 0.05
-
+		_LightAdjust("Light Adjustment", Range(0,10)) = 1
 		_FinalAdjust("Final Light Adjustment", Range(-0.4,0.4)) = 0
+
+		[Header(Optimization)]
+		_LowDensityThreshold("Low Density Threshold",Range(0,0.2)) = 0.05
 
 	}
 	SubShader
@@ -74,14 +80,20 @@
 			sampler2D _CloudWeather;
 			sampler2D _NoiseTex;
 
-			const float MAX_FLOAT =1.0e+30;
+			const float MAX_FLOAT =1.0e+12;
 
 			float _EarthRadius;
 			float _LowerHeight;
 			float _UpperHeight;
 			float3 _CameraPos;
+
 			float _CloudBaseScale;
+			float _CloudShapeSpeed;
+			float _CloudShapeDirection;
 			float _CloudWeatherScale;
+			float _CloudWeatherSpeed;
+			float _CloudWeatherDirection;
+
 			float _CloudDetailScale;
 
 			float _DetailErodeStrength;
@@ -96,7 +108,7 @@
 			float _DensityClampHigh;
 			float _CloudCoverage;
 
-			float _CloudEdgeFactor;
+
 
 			float _PowderFactor;
 			float _LightAdjust;
@@ -141,7 +153,8 @@
 				if (delta < 0) return float2(MAX_FLOAT, MAX_FLOAT);
 
 				float t1 = - (b + sqrt(delta)) / (2 * a); float t2 = - (b - sqrt(delta)) / (2 * a);
-				if (t1 < 0) t1 = MAX_FLOAT; if (t2 < 0) t2 = MAX_FLOAT;
+				//if (t1 < 0) t1 = MAX_FLOAT; 
+				//if (t2 < 0) t2 = MAX_FLOAT;
 				return float2(t1,t2);
 			}
 
@@ -156,17 +169,21 @@
 
 
 
-			float SampleDensity(float3 pos, float linePos)
+			float SampleDensity(float3 pos, float linePos,float sinS, float cosS, float sinW, float cosW)
 			{
 				//float4 s = tex3D(_CloudBase,float3(pos.x/ 10000 / _CloudBaseScale, pos.z/10000 / _CloudBaseScale, linePos / 2));
 				//float c = tex2D(_CloudWeather,float2(pos.x/ 10000 / _CloudWeatherScale, pos.z/10000 / _CloudWeatherScale));
-
-				float4 s = tex3Dlod(_CloudBase,float4(pos.x/ 10000 / _CloudBaseScale, pos.z/10000 / _CloudBaseScale, linePos / _CloudBaseScale / 2 ,0));
+				if (linePos<0 || linePos > 1) return 0;
+				float3 uvw = float3(pos.x/ 10000 / _CloudBaseScale, pos.z/10000 / _CloudBaseScale , pos.y/10000 / _CloudBaseScale );
+				uvw += float3(_Time.x/10 * _CloudShapeSpeed * cosS, _Time.x/10 * _CloudShapeSpeed * sinS, 0);
+				float4 s = tex3Dlod(_CloudBase,float4(uvw,0));
 
 				float random = tex2Dlod(_NoiseTex, float4(frac(pos.y + _Time.x), frac(pos.x + _Time.y),0,0)).r ;
 				//float c = tex2Dlod(_CloudWeather,float4(pos.x / 10000 / _CloudWeatherScale, pos.z/10000 / _CloudWeatherScale,0,4));
 
-				float c = tex2Dlod(_CloudWeather,float4((pos.x + 100 *  sin(random*6.2832) ) / 10000 / _CloudWeatherScale, (pos.z + 100 * cos(random*6.2832) ) /10000 / _CloudWeatherScale,0,4));
+				float2 uv = float2((pos.x + 100 *  sin(random*6.2832))  / 10000 / _CloudWeatherScale, (pos.z + 100 * cos(random*6.2832) ) /10000 / _CloudWeatherScale);
+				uv += float2(_Time.x/10 * _CloudWeatherSpeed * cosW, _Time.x/10 * _CloudWeatherSpeed * sinW);
+				float c = tex2Dlod(_CloudWeather,float4(uv,0,4));
 //
 //				c /= 2;
 
@@ -189,7 +206,7 @@
 
 			float SampleDetail(float3 pos, float linePos)
 			{
-				float4 s = tex3Dlod(_CloudDetail,float4(pos.x/ 2500 / _CloudDetailScale, pos.z/2500 / _CloudDetailScale, 4 * linePos/ _CloudDetailScale ,0));
+				float4 s = tex3Dlod(_CloudDetail,float4(pos.x/ 2500 / _CloudDetailScale - _Time.x, pos.z/2500 / _CloudDetailScale + _Time.x, pos.y/2500 / _CloudDetailScale ,0));
 				return s.r * 0.33 + s.g * 0.33 + s.b * 0.33;
 			}
 
@@ -224,31 +241,21 @@
 
 
 
-			float SampleSunLight(float3 rayPos, float linePos, float3 lightDir, float density)
+			float SampleSunLight(float3 rayPos, float3 lightDir, float density,float sinS, float cosS, float sinW, float cosW)
 			{
 				
-				//float3 shadowRayPos = rayPos + lightDir * 100 ;
-				//float shadowLinePos = linePos + lightDir.y * 100  / (_UpperHeight - _LowerHeight);
-
-
-
-
-				//float3 samplingDir = GetConeSamplingDir(lightDir,rayPos);
-
-				//float3 shadowRayPos = rayPos + samplingDir * 200 * random;
-				//float shadowLinePos = linePos + samplingDir.y * 200 * random / (_UpperHeight - _LowerHeight);
 
 				float random = tex2Dlod(_NoiseTex, float4(frac(rayPos.y + _SinTime.x), frac(rayPos.z + _SinTime.y),0,0)).r ;
 				float3 shadowRayPos = rayPos + lightDir * 600 * (0.5 + random) ;
-				float3 shadowLinePos = linePos + lightDir.y * 600  * (0.5 + random) / (_UpperHeight - _LowerHeight);
-				float newDensity = SampleDensity(shadowRayPos, shadowLinePos);
+				float shadowLinePos = (shadowRayPos.y - _LowerHeight) / (_UpperHeight - _LowerHeight);
+				float newDensity = SampleDensity(shadowRayPos, shadowLinePos,sinS,cosS,sinW,cosW);
 				float diff = saturate(density - newDensity);
-				diff = smoothstep(0.00,_CloudEdgeFactor, diff)* density ;
+				diff = smoothstep(0.00,0.01, diff)* density ;
 
 				//random = tex2Dlod(_NoiseTex, float4(frac(rayPos.y + random), frac(rayPos.z + random),0,0)).r ;
 				shadowRayPos = rayPos + lightDir * 3000 * (0.5 + random) ;
-				shadowLinePos = linePos + lightDir.y * 3000  * (0.5 + random) / (_UpperHeight - _LowerHeight);
-				newDensity = SampleDensity(shadowRayPos, shadowLinePos);
+				shadowLinePos = (shadowRayPos.y - _LowerHeight) / (_UpperHeight - _LowerHeight);
+				newDensity = SampleDensity(shadowRayPos, shadowLinePos,sinS,cosS,sinW,cosW);
 
 				diff *= saturate((1 - newDensity * 2));
 
@@ -270,44 +277,76 @@
 
 
 
-			float4 RayMarching(float3 start, float3 end, int sampleStep, float3 lightDir,float2 uv)
+			float4 RayMarching(float3 start, float3 end, int sampleStep, float3 lightDir,float lastFrameAlpha,bool lastIsEffective)
 			{
 				
 				float3 stepVector = (end - start) / (float)sampleStep;
 				float3 rayDir = normalize(stepVector);
 				float stepSize = length(stepVector);
-				float stepLineSize = 1/ (float)sampleStep;
-				float3 rayPos = start ; float rayLinePos = 0;
+				bool cheap = false;
+
+				if (lastFrameAlpha > 0.999 && lastIsEffective)
+				{
+					
+					stepVector *= 20;
+					stepSize *= 20;
+					cheap = true;
+				}
+
+				if (stepSize > 600 && _CameraPos.y > _LowerHeight)
+				{
+					stepVector = stepVector/stepSize*600;
+					stepSize = 600;
+				}
+
+
+				float3 rayPos = start ; 
+
+				float rayHeightPos = 0 ;
+
 				float density = 0;
 				float directionalFactor = pow(max(0, dot(rayDir, lightDir)),_DirectionalSpread);
 				float3 directionalScattering = float3(1,1,1) * pow(10,_DirectionalStrength) * directionalFactor;
-				bool cheap = false;
+
 				uint cumuLowDensity = 0;
 
 				float4 light = float4(0,0,0,1);
 				light.a = 1;
 
+				float sinS = sin(_CloudShapeDirection/360*6.2832);
+				float cosS = cos(_CloudShapeDirection/360*6.2832);
+				float sinW = sin(_CloudWeatherDirection/360*6.2832);
+				float cosW = cos(_CloudWeatherDirection/360*6.2832);
 
 				float3 stepVectorTMP = stepVector;
 				float3 stepSizeTMP = stepSize;
-				float3 stepLineSizeTMP = stepLineSize;
 				float3 baseColor = 0;
 
 				for (int i = 0; i < sampleStep; i++)
 				{
+					
 					float random = tex2Dlod(_NoiseTex, float4(frac(rayPos.y + _SinTime.x), frac(rayPos.x + _SinTime.y),0,0)).r ;
 					//random = 0.5;
-					rayPos = rayPos +  stepVectorTMP * (random + 0.5);
-					rayLinePos = rayLinePos + stepLineSizeTMP  * (random + 0.5);
 
-					density = SampleDensity(rayPos, rayLinePos) - SampleDetail(rayPos, rayLinePos)* _DetailErodeStrength;
+
+					//rayPos = rayPos +  stepVectorTMP * (random + 0.5);
+
+					rayPos = rayPos +  stepVectorTMP * random * 2;
+
+					if(length(rayPos - _CameraPos) > _ViewRange) break;
+
+
+					float rayHeightPos = (rayPos.y - _LowerHeight)/(_UpperHeight - _LowerHeight);
+
+
+					density = SampleDensity(rayPos, rayHeightPos, sinS,cosS,sinW,cosW) - SampleDetail(rayPos, rayHeightPos)* _DetailErodeStrength;
 
 
 					if (density <= _DensityCutoff)  density = 0;
 					float transmittanceCurrent = exp(- stepSizeTMP * density * _CloudTransmittance);
 
 
-					if(length(rayPos - _CameraPos) > _ViewRange) break;
+
 					if (density <= _LowDensityThreshold) { cumuLowDensity += 1; } 
 					else 
 					{
@@ -315,24 +354,23 @@
 						cumuLowDensity = 0;
 						stepSizeTMP = stepSize;
 						stepVectorTMP = stepVector;
-						stepLineSizeTMP = stepLineSize;
 					}
 					if (cumuLowDensity >= 5) cheap = true;
-					if (light.a<0.15) cheap = true;
+					if (light.a<0.3) cheap = true;
 
 					if (cumuLowDensity >= 15 && cumuLowDensity % 15 == 0)
 					{
 						stepSizeTMP *= 1.5;
 						stepVectorTMP *= 1.5;
-						stepLineSizeTMP *= 1.5;
 					}
 
-
+					//cheap = false;
 
 					if (cheap) {baseColor = _AmbientColor.rgb ;}
 					else
 					{
-						baseColor = _AmbientColor.rgb + SampleSunLight(rayPos,rayLinePos,lightDir,density) * (float3(1.0,1.0,1.0) * _AmbientStrength + directionalScattering) ;
+						baseColor = _AmbientColor.rgb + SampleSunLight(rayPos,lightDir,density,sinS,cosS,sinW,cosW) * (float3(1.0,1.0,1.0) * _AmbientStrength + directionalScattering) ;
+
 					}
 
 
@@ -344,8 +382,9 @@
 
 					light.a *= transmittanceCurrent ;
 
-					if (rayLinePos >= 1) break;
-					if (light.a<0.015) break;
+					if (rayPos.y > _UpperHeight && start.y < end.y) break;
+					if (rayPos.y < _LowerHeight && start.y > end.y) break;
+					if (light.a<0.05) break;
 
 				}
 				light.xyz = ToneMapping(light.xyz) * (1 + _FinalAdjust);
@@ -353,6 +392,38 @@
 				//if(light.a <0.01) return float4(1,0,0,0);
 				//if(cumuLowDensity >= 15) return float4(1,0,0,0);
 				return light ;
+			}
+
+			void findSNE(float3 ray, out float3 rayMarchingStart, out float3 rayMarchingEnd)
+			{
+				float startT = 0; float endT = 0;
+
+				float2 tLow = RaySphereIntersectT(ray, _LowerHeight);
+				float2 tHigh = RaySphereIntersectT(ray, _UpperHeight);
+
+				if(_CameraPos.y < _UpperHeight && _CameraPos.y > _LowerHeight)
+				{
+					startT = 0; 
+					//endT = min(min(tLow.x,tLow.y),min(tHigh.x,tHigh.y));
+					endT = tHigh.y;
+					if (tLow.x > 0) endT = tLow.x;
+
+				}
+				if(_CameraPos.y > _UpperHeight)
+				{
+
+					startT = tHigh.x;
+					endT = tLow.x;
+				}
+				if(_CameraPos.y < _LowerHeight)
+				{
+
+					startT = tLow.y;
+					endT = tHigh.y;
+				}
+
+				rayMarchingStart = _CameraPos + ray * startT;
+				rayMarchingEnd = _CameraPos + ray * endT;
 			}
 
 
@@ -375,16 +446,16 @@
 			{
 				_AmbientStrength = pow(_AmbientStrength,2.5);
 				i.interpolatedRay = normalize(i.interpolatedRay);
-				if (i.interpolatedRay.y < 0.00) return 1;
+				if (_CameraPos.y < _LowerHeight && i.interpolatedRay.y < 0.00) return 1;
 
-				float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
+				float3 lightDir =  normalize(_WorldSpaceLightPos0.xyz);
+
 
 				float3 rayMarchingStart = 0;
 				float3 rayMarchingEnd = 0;
 
+				findSNE(i.interpolatedRay, rayMarchingStart, rayMarchingEnd);
 
-				rayMarchingStart = _CameraPos + i.interpolatedRay * RaySphereIntersectT(i.interpolatedRay, _LowerHeight).y;
-				rayMarchingEnd = _CameraPos + i.interpolatedRay * RaySphereIntersectT(i.interpolatedRay, _UpperHeight).y;
 
 				float4 reprojectionPoint = float4((rayMarchingStart + rayMarchingEnd) / 2,1);
 				float4 lastFrameClipCoord = mul(_LastFrameVPMatrix, reprojectionPoint);
@@ -392,13 +463,18 @@
 				float2 lastFrameUV  = float2(lastFrameClipCoord.x/lastFrameClipCoord.w, lastFrameClipCoord.y/lastFrameClipCoord.w)* 0.5 + 0.5;
 				float4 lastFrameCol = float4(0,0,0,1);
 				float lerpFac = 1;
-				if(abs(lastFrameClipCoord.x/lastFrameClipCoord.w)<1 && abs(lastFrameClipCoord.y/lastFrameClipCoord.w)<1) 
+				bool lastIsEffective = false;
+				if(abs(lastFrameClipCoord.x/lastFrameClipCoord.w)<1 && abs(lastFrameClipCoord.y/lastFrameClipCoord.w)<1 ) 
 				{
 					 lastFrameCol =  tex2D(_LastFrameTex, lastFrameUV);
-					 lerpFac = 0.075;
+					 lerpFac = 0.05;
+					 lastIsEffective = true;
 				}
-	
-				float4 currentFrameCol = RayMarching(rayMarchingStart, rayMarchingEnd, 64,lightDir,i.uv);
+
+				float4 currentFrameCol = RayMarching(rayMarchingStart, rayMarchingEnd, 64,lightDir,lastFrameCol.a,lastIsEffective);
+
+				//if(lastFrameCol.a>0.999999) lastFrameCol = float4(currentFrameCol.xyz,1);
+				//if (currentFrameCol.a>0.999999) currentFrameCol.a = 1;
 				return lerp(lastFrameCol, currentFrameCol, lerpFac);
 
 			}
