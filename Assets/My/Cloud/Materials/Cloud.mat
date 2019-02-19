@@ -72,35 +72,35 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AmbientStrength: 1.12
+    - _AmbientStrength: 1.31
     - _BumpScale: 1
     - _CloudBaseScale: 1.99
     - _CloudCoverage: 0.718
-    - _CloudDetailScale: 0.551
+    - _CloudDetailScale: 0.318
     - _CloudEdgeFactor: 0.092
-    - _CloudShapeDirection: 302
+    - _CloudShapeDirection: 107
     - _CloudShapeSpeed: 0.94
     - _CloudTransmittance: 0.0088
-    - _CloudWeatherDirection: 87
+    - _CloudWeatherDirection: 288
     - _CloudWeatherScale: 3.05
-    - _CloudWeatherSpeed: 0.45
+    - _CloudWeatherSpeed: 0.76
     - _Cutoff: 0.5
-    - _DensityClampHigh: 1.736
-    - _DensityClampLow: 0.7
+    - _DensityClampHigh: 1.416
+    - _DensityClampLow: 0.688
     - _DensityCutoff: 0.2
-    - _DetailErodeStrength: 0.317
+    - _DetailErodeStrength: 0.273
     - _DetailNormalMapScale: 1
-    - _DirectionalSpread: 13.6
-    - _DirectionalStrength: 1.06
+    - _DirectionalSpread: 38.3
+    - _DirectionalStrength: 5.1
     - _DstBlend: 0
     - _EarthRadius: 6400000
     - _FinalAdjust: 0.273
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _LightAdjust: 6.08
+    - _LightAdjust: 7.73
     - _LowDensityThreshold: 0.103
-    - _LowerHeight: 1500
+    - _LowerHeight: 1000
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1

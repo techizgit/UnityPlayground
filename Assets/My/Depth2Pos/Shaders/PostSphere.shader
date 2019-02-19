@@ -1,9 +1,10 @@
-﻿Shader "Custom/CloudBlending"
+﻿Shader "Custom/PostSphere"
 {
 	Properties
 	{
 		_MainTex("Texture", 2D) = "white" {}
-		_CloudTex("Cloud Texture", 2D) = "white" {}
+		_Radius("Radius", float) = 50
+		_TintColor("Tint Color", Color) = (1, 1, 1, 0)
 
 	}
 	SubShader
@@ -20,8 +21,11 @@
 			#include "UnityCG.cginc"
 
 			sampler2D _MainTex;
-			sampler2D _CloudTex;
 			sampler2D_float _CameraDepthTexture;
+			float4 _WorldSpaceEffectPos;
+			float _Radius;
+			float _SpinningSpeed;
+			float4 _TintColor;
 
 
 
@@ -59,21 +63,29 @@
 				return o;
 			}
 
+			float CalculateLerp(float dist, float2 uv)
+			{
+				float lerpFac = (dist / _Radius) * (dist / _Radius);
+				uv.y = uv.y / _ScreenParams.x * _ScreenParams.y;
+				uv *= 500;
+				if (abs(1 - frac(uv.x)) < 0.5 && abs(1 - frac(uv.y)) < 0.5) lerpFac = 1;
+				return lerpFac;
+			}
+
 
 
 			half4 frag (v2f i) : SV_Target
 			{
 				half4 col = tex2D(_MainTex, i.uv);
-				float4 cloud = tex2D(_CloudTex, i.uv);
-				float d = Linear01Depth(tex2D(_CameraDepthTexture, i.uv_depth));
-				if (cloud.a > 0.97) cloud.a = 1;
-				if (d == 1) 
-				{
-					return lerp(col, cloud, 1 - cloud.a);
-				} else
-				{
-					return col;
-				}
+				float rawDepth = tex2D(_CameraDepthTexture, i.uv_depth);
+				float linearDepth = LinearEyeDepth(rawDepth);
+				float3 surfacePos = _WorldSpaceCameraPos + (linearDepth * i.interpolatedRay).xyz;
+				half4 effectCol = col;
+				float dist = distance(surfacePos, _WorldSpaceEffectPos);
+
+				if (dist < _Radius ) effectCol = float4(1,0.3,0.3,1);
+				float lerpFac = CalculateLerp(dist, i.uv);
+				return lerp(col, effectCol, lerpFac );
 			}
 			ENDCG
 		}

@@ -34,8 +34,8 @@ public class CameraMover : MonoBehaviour
 	void Start ()
 	{
 		Cursor.lockState = CursorLockMode.Locked;
-		rotationX = 90 ;
-		rotationY = 30;
+		rotationX = transform.eulerAngles.y ;
+		rotationY = - transform.eulerAngles.x;
 	}
 
 	void Update ()
@@ -49,7 +49,8 @@ public class CameraMover : MonoBehaviour
 		
 
 			transform.localRotation = Quaternion.AngleAxis(rotationX, Vector3.up);
-			transform.localRotation *= Quaternion.AngleAxis(rotationY, Vector3.left);
+			transform.localRotation *= Quaternion.AngleAxis(rotationY , Vector3.left);
+
 		}
 
 		if (Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift))

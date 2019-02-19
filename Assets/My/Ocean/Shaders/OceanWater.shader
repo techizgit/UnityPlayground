@@ -1,9 +1,4 @@
-﻿// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-
-Shader "Custom/OceanWater"
+﻿Shader "Custom/OceanWater"
 {
 	Properties
 	{
@@ -58,8 +53,9 @@ Shader "Custom/OceanWater"
 	SubShader
 	{
 
-		//Zwrite Off
 		Tags { "RenderType"="Transparent" "RenderQueue"="Transparent" "LightMode"="ForwardBase" }
+
+		//Grab background color for refractive
 		GrabPass { "_WaterBackground" }
 		Pass{
 	            CGPROGRAM
@@ -71,7 +67,6 @@ Shader "Custom/OceanWater"
 	            #include "autolight.cginc"
 	            #include "lighting.cginc"
 
-	            // Properties
 	            samplerCUBE _Skybox;
 	            sampler2D _FoamTex;
 	            sampler2D _NormalTex;
@@ -117,12 +112,12 @@ Shader "Custom/OceanWater"
 
 				float2 _ShallowMaskOffset;
 
+				//Sample wave displacement from a matrix passed from compute shader
 				struct waveSampler
 				{
 					float x;
 					float z;
 					float3 displacement;
-
 				};
 
 	            struct vertexInput
@@ -140,14 +135,11 @@ Shader "Custom/OceanWater"
 	                float2 uv : TEXCOORD0;
 	                float3 worldPos : TEXCOORD1;
 	                float4 grabPos : TEXCOORD2;
-//	                float3 worldNormal : TEXCOORD3;
-//	                float3 worldTangent : TEXCOORD4;
-//	                float3 worldBitangent : TEXCOORD5;
 	            };
 
 	            StructuredBuffer<waveSampler> displacementSample;
 
-
+	            //Calculate single gerstner wave bitangent
 	            float3 SingleWaveB(float w, float Amp, float Stp, float Dir, float3 vert, float psi, float xScale, float zScale, float timeScale)
 	            {
 	            	float Dz, Dx;
@@ -163,6 +155,7 @@ Shader "Custom/OceanWater"
 	            	return dB;
 	            }
 
+	            //Calculate single gerstner wave tangent
 	            float3 SingleWaveT(float w, float Amp, float Stp, float Dir, float3 vert, float psi, float xScale, float zScale, float timeScale)
 	            {
 	            	float Dz, Dx;
@@ -179,12 +172,11 @@ Shader "Custom/OceanWater"
 	            }
 
 
-
+	            //Adding waves with different directions together
 	            void CalculateGerstnerBT(float Amp, float Stp, float Dir, float Lth ,float attenuationFac,float3 vert,out float3 dB, out float3 dT)
 	            {
 	            	dB = 0; dT = 0;
 	            	Stp *= 0.3;
-	            	//if (Lth <= 8) attenuationFac = 1;
 	            	attenuationFac  = attenuationFac + (1 - attenuationFac)*sqrt(2/Lth);
 	            	Amp = Amp * attenuationFac * Lth / 40 ;
 	            	Stp =  (1-step(Amp,0)) * Stp;
@@ -209,6 +201,8 @@ Shader "Custom/OceanWater"
 	            	dT += SingleWaveT(w,Amp*0.65,Stp,Dir+96,vert,psi,0.7,0.65,6);
 	            }
 
+
+	            //Adding waves with different wave length together
 	            void CalculateWaveBT(float3 vert, out float3 binormal, out float3 tangent, float attenuationFac)
 	            {
 
@@ -264,15 +258,14 @@ Shader "Custom/OceanWater"
 	            	binormal.x += dB.x; binormal.z += dB.z; binormal.y += dB.y;
 	            	tangent.x += dT.x; tangent.z += dT.z; tangent.y += dT.y;
 
-	            	//binormal = saturate(binormal); tangent = saturate(tangent);
 
 	            	binormal = normalize(binormal);
 	            	tangent = normalize(tangent);
 
-
 	            	         	
 	            }
 
+	            //Calculating fresnel factor
 	            float CalculateFresnel (float3 I, float3 N)
 	            {
 	            	float R_0 = (_AirRefractiveIndex - _WaterRefractiveIndex) / (_AirRefractiveIndex + _WaterRefractiveIndex);
@@ -285,63 +278,58 @@ Shader "Custom/OceanWater"
 	            	return (floor(uv * _CameraDepthTexture_TexelSize.zw) + 0.5) * abs( _CameraDepthTexture_TexelSize.xy);
 	            }
 
+	            //Fake Sub-suraface scattering calculation
 	            float4 CalculateSSSColor(float3 lightDirection, float3 worldNormal, float3 viewDir,float waveHeight, float shadowFactor){
 	            	float lightStrength = sqrt(saturate(lightDirection.y));
-	            	//blockFactor = 1;
 	            	float SSSFactor = pow(saturate(dot(viewDir ,lightDirection) )+saturate(dot(worldNormal ,-lightDirection)) ,_DirectTranslucencyPow) * shadowFactor * lightStrength * _EmissionStrength;
 	            	return _DirectionalScatteringColor * (SSSFactor + waveHeight * 0.6);
 	            }
 
-
+	            //Calculate refractive color
 	            float4 CalculateRefractiveColor(float3 worldPos, float4 grabPos, float3 worldNormal, float3 viewDir,float3 lightDirection,float landHeight,float waveHeight,float shadowFactor)
 	            {
+	            	//USING DEPTH TEXTURE(.W) BUT NOT ACTUAL RAYLENGTH IN WATER, NEED TO FIX
 	           		float backgroundDepth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, grabPos));
-	            	//float surfaceDepth = UNITY_Z_0_FAR_FROM_CLIPSPACE(grabPos.z);
 	            	float surfaceDepth = grabPos.w;
 	            	float viewWaterDepthNoDistortion = backgroundDepth - surfaceDepth;
 
-
 	            	float4 distortedUV = grabPos;
 	            	float2 uvOffset = worldNormal.xz * _RefractionStrength;
-					//uvOffset.y *= 1 -  abs(viewDir.y) ;
+
+	            	//Distortion near water surface should be attenuated
 					uvOffset *= saturate(viewWaterDepthNoDistortion);
+
+
 					distortedUV.xy = AlignWithGrabTexel(distortedUV.xy + uvOffset);
+
+					//Resample depth to avoid false distortion above water
 	            	backgroundDepth = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, distortedUV));
 
 	            	surfaceDepth = grabPos.w;
 	            	float viewWaterDepth = backgroundDepth - surfaceDepth;
 
-
-//	            	if (viewWaterDepth < 0){
-//	            		distortedUV.xy = AlignWithGrabTexel(grabPos.xy);
-//	            		viewWaterDepth = viewWaterDepthNoDistortion;
-//	            	}
-
 					float tmp = step(viewWaterDepth,0);
-	            	distortedUV.xy = tmp * AlignWithGrabTexel(grabPos.xy) + (1-tmp) * distortedUV.xy;
-	            	viewWaterDepth = tmp * viewWaterDepthNoDistortion + (1-tmp) * viewWaterDepth;
+	            	distortedUV.xy = tmp * AlignWithGrabTexel(grabPos.xy) + (1 - tmp) * distortedUV.xy;
+	            	viewWaterDepth = tmp * viewWaterDepthNoDistortion + (1 - tmp) * viewWaterDepth;
 	            	            	           	
 	            	float4 transparentColor =  tex2Dproj(_WaterBackground , distortedUV);
 	            	float shallowWaterFactor = 0;
 
-					//float landHeight = tex2D(_HeightMap, float2(worldPos.x/_HeightMapTransform.x +_HeightMapTransform.z/100, worldPos.z/_HeightMapTransform.y+_HeightMapTransform.w/100));
 					shallowWaterFactor = saturate(pow(landHeight,_WaterDepthChangeFactor)) ;
-					//float4 ScatteredColor = lerp(_DeepColor, _ShallowColor, ShallowWaterFactor);
-					float4 ScatteredColor = _DeepColor  + _ShallowColor * shallowWaterFactor * (shadowFactor+1)*0.5;
 
-					float viewWaterDepthFactor = pow(saturate(viewWaterDepth/_WaterClarity),_WaterClarityAttenuationFactor);
+					float4 scatteredColor = _DeepColor  + _ShallowColor * shallowWaterFactor * (shadowFactor + 1) * 0.5;
+
+					float viewWaterDepthFactor = pow(saturate(viewWaterDepth / _WaterClarity), _WaterClarityAttenuationFactor);
 					float4 emissionSSSColor = CalculateSSSColor(lightDirection, worldNormal,  viewDir, waveHeight, shadowFactor);
 
-	            	return lerp(transparentColor , ScatteredColor, viewWaterDepthFactor) + emissionSSSColor;
+	            	return lerp(transparentColor , scatteredColor, viewWaterDepthFactor) + emissionSSSColor;
 	            }
 
-
-
-
+	            //Calculate reflective color
 	            float4 CalculateReflectiveColor(float3 worldPos, float4 grabPos, float3 worldNormal, float3 viewDir, out float4 distortedUV)
 	            {
 	            	float2 uvOffset = worldNormal.xz * _ReflectionDistortionStrength;
-	            	//uvOffset.x = 0;
+
 	            	uvOffset.y -= worldPos.y;
 	            	distortedUV = grabPos; distortedUV.xy += uvOffset;
 	            	#if _USE_SKYBOX	
@@ -353,94 +341,73 @@ Shader "Custom/OceanWater"
 
 	            }
 
-
 	            vertexOutput vert(vertexInput input)
 	            {
 	                vertexOutput output;
 
 					float3 worldPos = mul(unity_ObjectToWorld, input.vertex);
 
-
+					//Read displacement data from compute buffer
 					int x = round(input.uv.x * (_resolution - 1));
 					int z = round(input.uv.y * (_resolution - 1));
 					int index =  x * _resolution + z;
-
 					float3 disPos = displacementSample[index].displacement;
-
 
 					input.vertex.xyz = mul(unity_WorldToObject, float4(worldPos + disPos, 1));
 					worldPos = worldPos + disPos;
 					output.uv = input.uv;
     				output.pos = UnityObjectToClipPos(input.vertex);
 
-//    				float attenuationFac = 1;
-//	            	float landHeight = tex2Dlod(_HeightMap, float4(worldPos.x/_HeightMapTransform.x +_HeightMapTransform.z/100, worldPos.z/_HeightMapTransform.y+_HeightMapTransform.w/100,0,0));
-//	            	attenuationFac = saturate(pow((1.0 - landHeight),_ShoreWaveAttenuation));
-//    				CalculateWaveBT(worldPos, output.worldBitangent, output.worldTangent, attenuationFac);
-//    				output.worldNormal = normalize(cross(output.worldTangent, output.worldBitangent));
-
     				output.worldPos = worldPos;
     				output.grabPos = ComputeGrabScreenPos(output.pos);
 	                return output;
 	            }
 
-
-
-
-
 	            float4 frag(vertexOutput input) : SV_Target
 	            {
 	            	float3 viewDir = normalize(input.worldPos - _WorldSpaceCameraPos.xyz);
-	            	float landHeight = tex2D(_HeightMap, float2(input.worldPos.x/1200+0.25, input.worldPos.z/1200+0.25));
 
+	            	//Sampling landheight from height map
+	            	float landHeight = tex2D(_HeightMap, float2(input.worldPos.x/1200+0.25, input.worldPos.z/1200+0.25));
 	            	float attenuationFac = 1;
+
+	            	//Attenuate waves above shallow water
 					attenuationFac = saturate(pow((1.0 - landHeight),_ShoreWaveAttenuation));
 	            	float3 bitangent = float3(0,0,0);
 	            	float3 tangent = float3(0,0,0);
+
 	            	CalculateWaveBT(input.worldPos, bitangent, tangent, attenuationFac);
+
+	            	//Calculating normal, using BTN matrix
 	            	float3 worldNormal = normalize(cross(tangent, bitangent));
 	            	float3x3 M = {bitangent,tangent,worldNormal};
-
-	            	//float3x3 M = {input.worldBitangent, input.worldTangent, input.worldNormal};
 	            	M = transpose(M);
-
 	            	float3 tangentNormal = lerp(UnpackNormal(tex2D(_NormalTex, float2(input.worldPos.x / 50.0 * _NormalTex_ST.x,input.worldPos.z / 50.0 * _NormalTex_ST.y) + float2(0.94,0.34)*_Time.x*_NormalSpeed)),
 	            								UnpackNormal(tex2D(_NormalTex, float2(input.worldPos.x / 50.0 * _NormalTex_ST.x,input.worldPos.z / 50.0 * _NormalTex_ST.y) + float2(-0.85,-0.53)*_Time.x*_NormalSpeed)),0.5);
-
 	            	tangentNormal = normalize(tangentNormal) ;
 	            	float3 mappedWorldNormal = normalize(mul(M, tangentNormal));
+
 	            	float waveHeight = saturate(input.worldPos.y/_waveMaxHeight) ;
 	            	float3 lightDirection = normalize(_WorldSpaceLightPos0.xyz);
 
-
-	            	//float scatterViewFactor = saturate(dot(viewDir , lightDirection));
-					//float scatterFactor = pow(waveHeight,_WaveHeightPow)  + (1-waveHeight)*pow(scatterViewFactor,_ScatterAnglePow);
-
-
-
 					float3 specularColor = pow(max(0.0, dot(reflect(lightDirection, mappedWorldNormal),viewDir)), _Shininess);
-					//float3 specularColor = pow(max(0.0, dot(mappedWorldNormal,normalize(- viewDir + lightDirection))), _Shininess);
+
+					//This reflective distorted UV is calculated in CalculateReflectiveColor() with "out" keyword
 					float4 reflectiveDistortedUV;
 					float3 reflectedColor = CalculateReflectiveColor(input.worldPos, input.grabPos, mappedWorldNormal,viewDir,reflectiveDistortedUV);
-					//reflectiveDistortedUV.x = 0;
 
 					reflectiveDistortedUV.x = input.grabPos.x;
+
+					//Fake surface shadow sampled from another render texture
 					float shadowFactor = tex2Dproj(_ShadowMask, UNITY_PROJ_COORD(reflectiveDistortedUV));
-					//shadowFactor = saturate(pow(shadowFactor,0.5));
+
+					//Blocking false specular
 					float blockFactor = saturate(1-tex2Dproj(_ReflectionBlockTex, UNITY_PROJ_COORD(reflectiveDistortedUV)).r);
 
 					float F = CalculateFresnel (-viewDir, mappedWorldNormal);
 					float4 refractiveColor = CalculateRefractiveColor(input.worldPos, input.grabPos, mappedWorldNormal,viewDir,lightDirection,landHeight,waveHeight,shadowFactor);
 
-
-					//float foamFactor =saturate(tex2D(_FoamMap, input.uv) * attenuationFac * tex2D(_FoamTex, input.uv * 20).a * 10);
-
 					float4 col = float4(lerp(refractiveColor ,reflectedColor ,F),1) + float4(specularColor,1) * shadowFactor * blockFactor;
-
-
-
-	                //return blockFactor;
-	                //return lerp(col,float4(0.9,0.9,0.9,1),foamFactor) ;
 	                return col;
 	            }
 	            ENDCG

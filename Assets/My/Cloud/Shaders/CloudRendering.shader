@@ -467,7 +467,7 @@
 				if(abs(lastFrameClipCoord.x/lastFrameClipCoord.w)<1 && abs(lastFrameClipCoord.y/lastFrameClipCoord.w)<1 ) 
 				{
 					 lastFrameCol =  tex2D(_LastFrameTex, lastFrameUV);
-					 lerpFac = 0.05;
+					 lerpFac = 0.07;
 					 lastIsEffective = true;
 				}
 
