@@ -14,45 +14,48 @@ public class Cloud : MonoBehaviour
 	private Camera cam;
 	private Matrix4x4 previousVP;
 
-	// Demo Code
-
 	void Start()
 	{
-		//_scannables = FindObjectsOfType<Scannable>();
 	}
 
 	void Update()
 	{
-		//Debug.Log(previousVP[1,1]);
 	}
-	// End Demo Code
 
 	void OnEnable()
 	{
 		cam = GetComponent<Camera>();
 		cam.depthTextureMode = DepthTextureMode.Depth;
-		//cloud = new RenderTexture(Screen.width >> downSampling, Screen.height >> downSampling, 24,RenderTextureFormat.Default);
+		//Down-sampling the render texture to improve performance
 		cloud = new RenderTexture(1920 >> downSampling, 1080 >> downSampling, 24,RenderTextureFormat.Default);
+		//Another render texture to save last frame render result
 		cloudLastFrame = new RenderTexture(1920 >> downSampling, 1080 >> downSampling, 24,RenderTextureFormat.Default);
 	}
-
-	//[ImageEffectOpaque]
+		
 	void OnRenderImage(RenderTexture src, RenderTexture dst)
 	{
+		//Passing last frame's view projection matrix to GPU to apply temporal upsampling
 		cloudMaterial.SetMatrix("_LastFrameVPMatrix",previousVP);
+		//Passing last frame's render texture to GPU
 		cloudMaterial.SetTexture("_LastFrameTex",cloudLastFrame);
+		//Passing player position to GPU
 		cloudMaterial.SetVector("_CameraPos", transform.position);
 		CustomBlit(null, cloud, cloudMaterial);
+
+		//Need to use this method because render texture is reference type (class)
 		Graphics.CopyTexture(cloud, cloudLastFrame);
 		cloudBlendingMaterial.SetTexture("_CloudTex", cloud);
+
+		//Blend the cloud texture with background
 		Graphics.Blit(src, dst, cloudBlendingMaterial);
+
+		//Current frame view projection matrix to be applied in the next frame
 		previousVP = cam.projectionMatrix * cam.worldToCameraMatrix;
 	}
 
 	void CustomBlit(RenderTexture source, RenderTexture dest, Material mat)
 	{
-		// Compute Frustum Corners
-		//float camFar = cam.farClipPlane;
+
 		float camFov = cam.fieldOfView;
 		float camAspect = cam.aspect;
 
@@ -68,7 +71,6 @@ public class Cloud : MonoBehaviour
 
 		RenderTexture.active = dest;
 
-		//mat.SetTexture("_MainTex", source);
 
 		GL.PushMatrix();
 		GL.LoadOrtho();

@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Cloud
-  m_Shader: {fileID: 4800000, guid: 80cc35520731b0240a6976250cb0e64c, type: 3}
+  m_Name: SSS
+  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -21,18 +21,6 @@ Material:
     m_TexEnvs:
     - _BumpMap:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _CloudBase:
-        m_Texture: {fileID: 11700000, guid: eab5233727d16f040aee61c96a60e721, type: 2}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _CloudDetail:
-        m_Texture: {fileID: 11700000, guid: cea52616ae1240c4c80a446306bc88b8, type: 2}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _CloudWeather:
-        m_Texture: {fileID: 2800000, guid: ea96f16283310f14683c1e11477c5f60, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -59,10 +47,6 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _NoiseTex:
-        m_Texture: {fileID: 2800000, guid: 7ff4f8cc4029ad54b9aa6858dd6279c4, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -72,55 +56,22 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AmbientStrength: 1.31
     - _BumpScale: 1
-    - _CloudBaseScale: 1.99
-    - _CloudCoverage: 0.596
-    - _CloudDetailScale: 0.361
-    - _CloudEdgeFactor: 0.092
-    - _CloudShapeDirection: 107
-    - _CloudShapeSpeed: 0.94
-    - _CloudTransmittance: 0.0038
-    - _CloudWeatherDirection: 288
-    - _CloudWeatherScale: 3.05
-    - _CloudWeatherSpeed: 0.76
     - _Cutoff: 0.5
-    - _DensityClampHigh: 1.416
-    - _DensityClampLow: 0.688
-    - _DensityCutoff: 0.2
-    - _DetailErodeStrength: 0.383
     - _DetailNormalMapScale: 1
-    - _DirectionalSpread: 38.3
-    - _DirectionalStrength: 5.1
     - _DstBlend: 0
-    - _EarthRadius: 6400000
-    - _FinalAdjust: 0.273
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _LightAdjust: 7.73
-    - _LowDensityThreshold: 0.103
-    - _LowerHeight: 1000
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _PowderFactor: 0.071
-    - _SampleStep: 64
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _Test: 2.27
-    - _ThicknessDebug: 1.89
-    - _ThicknessLightFactor: 7.18
-    - _TransmittanceFactor1: 0
-    - _TransmittanceFactor2: 0
     - _UVSec: 0
-    - _UpperHeight: 6000
-    - _ViewRange: 200000
     - _ZWrite: 1
-    - _sampleStep: 64
     m_Colors:
-    - _AmbientColor: {r: 0.32658422, g: 0.37037203, b: 0.38679248, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 1, b: 0.69657564, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

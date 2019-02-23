@@ -117,14 +117,14 @@ Material:
     - _D8: 97
     - _D9: 140
     - _DetailNormalMapScale: 1
-    - _DirectTranslucencyPow: 1.49
+    - _DirectTranslucencyPow: 1.85
     - _Direction: 148
     - _DstBlend: 0
     - _Dx: 1
     - _Dz: 1
-    - _EmissionStrength: 1.01
+    - _EmissionStrength: 1.59
     - _Fancy: 0
-    - _FresnelPower: 8
+    - _FresnelPower: 14
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -173,7 +173,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DeepColor: {r: 0, g: 0.3343407, b: 0.4433962, a: 1}
     - _Direction: {r: 0, g: -60, b: -45, a: -120.9}
-    - _DirectionalScatteringColor: {r: 0, g: 0.7529412, b: 0.6315857, a: 1}
+    - _DirectionalScatteringColor: {r: 0, g: 0.83137256, b: 0.7354174, a: 1}
     - _Dx: {r: 1.5, g: 1, b: 0.5, a: -0.7}
     - _Dz: {r: 0.5, g: 0.7, b: 0.7, a: 0.6}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
@@ -182,5 +182,5 @@ Material:
     - _LightColor: {r: 0.20784314, g: 1, b: 0.9947009, a: 1}
     - _Q: {r: 0, g: 0, b: 0, a: 0}
     - _S: {r: 10, g: 200, b: 400, a: 211}
-    - _ShallowColor: {r: 0.43147027, g: 0.85463995, b: 0.9056604, a: 1}
+    - _ShallowColor: {r: 0.4292453, g: 0.9386792, b: 1, a: 1}
     - _ShallowMaskOffset: {r: -0.07, g: 0.12, b: 0, a: 0}
