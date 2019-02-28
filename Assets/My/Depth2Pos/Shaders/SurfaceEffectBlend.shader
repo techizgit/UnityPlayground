@@ -72,7 +72,9 @@
 			{
 				half4 col = tex2D(_MainTex, i.uv);
 				float rawDepth = tex2D(_CameraDepthTexture, i.uv_depth);
-				float linearDepth = LinearEyeDepth(rawDepth);
+
+				//float linearDepth = LinearEyeDepth(rawDepth);
+				float linearDepth = i.vertex.w;
 				float3 surfacePos = _WorldSpaceCameraPos + (linearDepth * i.interpolatedRay).xyz;
 				half4 effectCol = half4(0, 0, 0, 0);
 				float dist = distance(surfacePos.xz, _WorldSpaceEffectPos.xz);
