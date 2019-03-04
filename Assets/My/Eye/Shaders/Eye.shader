@@ -11,7 +11,7 @@ Shader "Custom/Eye"
 
 
 		_IOR("IOR of Eye", Range(1,2)) = 1.333
-		_Distortion("Distortion", Range(0,5)) = 3
+		_Distortion("Distortion", Range(0,3)) = 3
 		_PupilRadius("Pupil Radius", Range(0.01, 0.4)) = 0.3
 
 		_Shininess("Specular Shininess", Range(1,100)) = 5
@@ -61,52 +61,49 @@ Shader "Custom/Eye"
 	        	return o;
 	        }
 
-	        float2 remapUV(float2 uv)
-	        {
-	        	float lengthUV = length(uv);
-	        	float2 uvNormalized = uv / lengthUV ;
-	        	float newLength = 0;
-	        	if (lengthUV  < _PupilRadius) 
-	        	{
-	        		newLength = lengthUV / _PupilRadius * 0.14;
-	        	} else
-	        	{
-	        		newLength = (lengthUV - _PupilRadius) / (0.5 - _PupilRadius) * 0.36 + 0.14;
-	        	}
-	        	return uvNormalized * newLength;
-
-	        }
+			float2 RemapUV(float2 uv)
+			{
+				float lengthUV = length(uv);
+				float2 uvNormalized = uv / lengthUV ;
+				float newLength = 0;
+				if (lengthUV  < _PupilRadius) 
+				{
+					newLength = lengthUV / _PupilRadius * 0.14;
+				} else
+				{
+					newLength = (lengthUV - _PupilRadius) / (0.5 - _PupilRadius) * 0.36 + 0.14;
+				}
+				return uvNormalized * newLength;
+			}
 
 	        fixed4 frag(v2f i): SV_Target
 	        {
 	        	float2 sUV = i.uv - float2(0.5, 0.5);
 
-
-
 	        	float3 worldViewDir = normalize( _WorldSpaceCameraPos.xyz - i.worldPos);
 	        	float3 objectViewDir = normalize(mul(unity_WorldToObject, worldViewDir));
 	        	float3 objectNormal = i.objectNormal;
 
+	        	float3 T = cross(objectViewDir,objectNormal);
+	        	float3 D = cross(float3(0,1,0),T);
+	        	float2 uvDirection = float2(D.x,D.z);
 
-	        	float2 uvDirection = float2(objectViewDir.x, objectViewDir.z)/(objectViewDir.y  + 0.4);
+	        	float cosUpN = dot(objectNormal, float3(0,1,0));
+	        	float sinUpN = sqrt(1 - cosUpN * cosUpN);
 
-	        	float cosUpN = clamp(dot(objectNormal, float3(0,1,0)),0,0.9999);
-	        	float sinUpN = - sqrt(1 - cosUpN * cosUpN);
 	        	float cosVN = dot(objectNormal,  objectViewDir);
 	        	float sinVN = sqrt(1 - cosVN * cosVN);
 	        	float sinRN = sinVN / _IOR;
-	        	float cosRN = sqrt(1 - sinRN * sinRN);
-	        	float sinRT = cosUpN * cosRN - sinUpN * sinRN;
-
+	        	float cosRN =  sqrt(1 - sinRN * sinRN);
+				float cosUpR = sinUpN * sinRN + cosUpN * cosRN;
 	        	float2 sUVIris = sUV / _IrisRadius / 2;
 
 	        	float d1 = sqrt(1 - sUVIris.x * sUVIris.x - sUVIris.y * sUVIris.y) - 0.86603;
 	        	float d2 = sqrt(0.3025 - sUVIris.x * sUVIris.x - sUVIris.y * sUVIris.y) - 0.22913;
+	        	float2 deltaUV = _Distortion * (d2 - d1) * sinRN / cosUpR * uvDirection;
 
-	        	float2 deltaUV = (d2 - d1) * (sinRN / cosUpN / sinRT) * uvDirection;
 
-
-	        	float2 uvIris = remapUV(sUVIris  + deltaUV * _Distortion);
+	        	float2 uvIris = RemapUV(sUVIris  + deltaUV);
 	        	float irisMask = tex2D(_IrisMask, uvIris + float2(0.5,0.5));
 	         	if (length(uvIris) > 0.5) irisMask = 0;
 
