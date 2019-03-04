@@ -82,7 +82,7 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _PupilRadius: 0.189
+    - _PupilRadius: 0.184
     - _Shininess: 44
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
