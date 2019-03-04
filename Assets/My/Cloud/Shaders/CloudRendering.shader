@@ -5,7 +5,7 @@
 
 		[Header(Textures)]
 		_CloudBase("Cloud Base Texture", 3D) = "white" {}
-		_CloudBaseScale("Cloud Base Shape Scale", Range(0.4,2.8)) = 1
+		_CloudBaseScale("Cloud Base Shape Scale", Range(0.4,3.8)) = 1
 
 		_CloudDetail("Cloud Detail Texture", 3D) = "white" {}
 		_CloudDetailScale("Cloud Detail Shape Scale", Range(0.2,1.2)) = 1
@@ -190,7 +190,7 @@
 			float SampleDetail(float3 pos, float linePos)
 			{
 				float4 s = tex3Dlod(_CloudDetail,float4(pos.x/ 2500 / _CloudDetailScale - _Time.x, pos.z/2500 / _CloudDetailScale + _Time.x, pos.y/2500 / _CloudDetailScale ,0));
-				return s.r * 0.33 + s.g * 0.33 + s.b * 0.33;
+				return (s.r * 0.33 + s.g * 0.33 + s.b * 0.33) *  _DetailErodeStrength;
 			}
 
 			//Sample density towards the sun
@@ -200,14 +200,14 @@
 				float random = tex2Dlod(_NoiseTex, float4(frac(rayPos.y + _SinTime.x), frac(rayPos.z + _SinTime.y),0,0)).r ;
 				float3 shadowRayPos = rayPos + lightDir * 600 * (0.5 + random) ;
 				float shadowLinePos = (shadowRayPos.y - _LowerHeight) / (_UpperHeight - _LowerHeight);
-				float newDensity = SampleDensity(shadowRayPos, shadowLinePos,sinS,cosS,sinW,cosW);
+				float newDensity = SampleDensity(shadowRayPos, shadowLinePos,sinS,cosS,sinW,cosW) - SampleDetail(shadowRayPos, shadowLinePos);
 				float diff = saturate(density - newDensity);
 				diff = smoothstep(0.00,0.01, diff)* density ;
 
 				//Sample at around 3000m away
 				shadowRayPos = rayPos + lightDir * 3000 * (0.5 + random) ;
 				shadowLinePos = (shadowRayPos.y - _LowerHeight) / (_UpperHeight - _LowerHeight);
-				newDensity = SampleDensity(shadowRayPos, shadowLinePos,sinS,cosS,sinW,cosW);
+				newDensity = SampleDensity(shadowRayPos, shadowLinePos,sinS,cosS,sinW,cosW)  - SampleDetail(shadowRayPos, shadowLinePos);
 
 				//The higher density differece is, the higher the sun light is received at this point
 				diff *= saturate((1 - newDensity * 2));
@@ -285,7 +285,7 @@
 					float rayHeightPos = (rayPos.y - _LowerHeight)/(_UpperHeight - _LowerHeight);
 
 					//Density cut-off
-					density = SampleDensity(rayPos, rayHeightPos, sinS,cosS,sinW,cosW) - SampleDetail(rayPos, rayHeightPos)* _DetailErodeStrength;
+					density = SampleDensity(rayPos, rayHeightPos, sinS,cosS,sinW,cosW) - SampleDetail(rayPos, rayHeightPos);
 					if (density <= _DensityCutoff)  density = 0;
 
 					//Current step transmittance
