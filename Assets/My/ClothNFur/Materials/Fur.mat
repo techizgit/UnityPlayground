@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Eye
-  m_Shader: {fileID: 4800000, guid: 32164bfb195401449aad448c73390447, type: 3}
+  m_Name: Fur
+  m_Shader: {fileID: 4800000, guid: 755d97b0c84f26a4a86f89c01fb1a748, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -20,6 +20,18 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CloudBase:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CloudDetail:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CloudWeather:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -39,19 +51,19 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _IrisMask:
-        m_Texture: {fileID: 2800000, guid: ea250f8a23db87e43b7ca0d143cbb05f, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _IrisTex:
-        m_Texture: {fileID: 2800000, guid: 33a74fc0bcdce6f4b9ac10b37468cc41, type: 3}
+    - _FurTex:
+        m_Texture: {fileID: 2800000, guid: 393487d228ec10e428936e857f3192d6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 62d1144fc01f45b4b8e583cb98075723, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NoiseTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -63,33 +75,64 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _ScleraTex:
-        m_Texture: {fileID: 2800000, guid: 2abbf550e00a2b84185cca4054b37b99, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     m_Floats:
+    - _AmbientStrength: 2
     - _BumpScale: 1
+    - _CloudBaseScale: 1
+    - _CloudCoverage: 0.5
+    - _CloudDetailScale: 1
+    - _CloudShapeDirection: 0
+    - _CloudShapeSpeed: 1
+    - _CloudTransmittance: 0.01
+    - _CloudWeatherDirection: 1
+    - _CloudWeatherScale: 1
+    - _CloudWeatherSpeed: 1
     - _Cutoff: 0.5
+    - _DensityClampHigh: 1.5
+    - _DensityClampLow: 0.1
+    - _DensityCutoff: 0.2
+    - _DetailErodeStrength: 0.3
     - _DetailNormalMapScale: 1
-    - _Distortion: 2
+    - _DirectionalSpread: 30
+    - _DirectionalStrength: 4
     - _DstBlend: 0
+    - _EarthRadius: 200000
+    - _FinalAdjust: 0
+    - _FurAO: 0.061
+    - _FurDensity: 10.4
+    - _FurHardness: 2.49
+    - _FurLength: 0.0378
+    - _FurShadowStrength: 0.197
+    - _FurSoftness: 2.34
+    - _FurThinness: 0.13
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _IOR: 1.33
-    - _IrisRadius: 0.277
+    - _LightAdjust: 1
+    - _LowDensityThreshold: 0.05
+    - _LowerHeight: 1000
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _PupilRadius: 0.144
-    - _Shininess: 32.5
+    - _PowderFactor: 0.02
+    - _RimLightPower: 4.83
+    - _Shininess: 300
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _SpecularPower: 1.03
+    - _SpecularStrength: 1.177
     - _SrcBlend: 1
+    - _ThicknessDebug: 1
+    - _TransmissionRimPower: 6.59
+    - _TransmissionSpread: 5.87
+    - _TransmissionStrength: 3
     - _UVSec: 0
+    - _UpperHeight: 4000
+    - _ViewRange: 50000
     - _ZWrite: 1
     m_Colors:
+    - _AmbientColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _Force: {r: -1.3e-44, g: -2, b: 0, a: 0}
+    - _ForceGlobal: {r: 0, g: 0, b: 0, a: 0}
