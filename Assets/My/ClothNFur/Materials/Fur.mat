@@ -98,12 +98,12 @@ Material:
     - _DstBlend: 0
     - _EarthRadius: 200000
     - _FinalAdjust: 0
-    - _FurAO: 0.061
+    - _FurAO: 0.615
     - _FurDensity: 10.4
     - _FurHardness: 2.49
-    - _FurLength: 0.0378
-    - _FurShadowStrength: 0.197
-    - _FurSoftness: 2.34
+    - _FurLength: 0.0217
+    - _FurShadowStrength: 0.284
+    - _FurSoftness: 2.59
     - _FurThinness: 0.13
     - _GlossMapScale: 1
     - _Glossiness: 0.5
@@ -134,5 +134,5 @@ Material:
     - _AmbientColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Force: {r: -1.3e-44, g: -2, b: 0, a: 0}
+    - _Force: {r: 0, g: -2, b: 0, a: 0}
     - _ForceGlobal: {r: 0, g: 0, b: 0, a: 0}
